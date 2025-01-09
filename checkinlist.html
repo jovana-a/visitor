@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Check-In List</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            color: #4D4D4D;
+            background: url('office.jpg') no-repeat center center fixed;
+            background-size: cover;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        .checkout {
+            color: red;
+            cursor: pointer;
+        }
+        .checked-out {
+            color: grey;
+        }
+        .logo {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <img src="Bluebar.jpg" alt="Logo" class="logo">
+        <h1>Check-In List</h1>
+        <button onclick="resetList()">Reset List</button>
+        <button onclick="saveToPDF()">Save to PDF</button>
+        <table id="checkInList">
+            <thead>
+                <tr>
+                    <th>Vorname</th>
+                    <th>Nachname</th>
+                    <th>Email Adresse</th>
+                    <th>Brother Kontakt</th>
+                    <th>Check-In Time</th>
+                    <th>Check-Out Time</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        function loadCheckInData() {
+            const checkInData = JSON.parse(localStorage.getItem('checkInData')) || [];
+            const table = document.getElementById('checkInList').getElementsByTagName('tbody')[0];
+            table.innerHTML = '';
+
+            checkInData.forEach((data) => {
+                const newRow = table.insertRow();
+                newRow.insertCell(0).innerText = data.vorname;
+                newRow.insertCell(1).innerText = data.nachname;
+                newRow.insertCell(2).innerText = data.email;
+                newRow.insertCell(3).innerText = data.kontakt;
+                newRow.insertCell(4).innerText = data.checkInTime;
+                const checkOutCell = newRow.insertCell(5);
+                if (data.checkedOut) {
+                    checkOutCell.innerText = data.checkOutTime;
+                    checkOutCell.classList.add('checked-out');
+                } else {
+                    const checkOutButton = document.createElement('button');
+                    checkOutButton.innerText = 'Check Out';
+                    checkOutButton.classList.add('checkout');
+                    checkOutButton.onclick = function() {
+                        if (!data.checkedOut) {
+                            data.checkedOut = true;
+                            data.checkOutTime = new Date().toLocaleString();
+                            localStorage.setItem('checkInData', JSON.stringify(checkInData));
+                            loadCheckInData();
+                        }
+                    };
+                    checkOutCell.appendChild(checkOutButton);
+                }
+            });
+        }
+
+        function resetList() {
+            if (confirm('Do you really want to reset the list?')) {
+                const username = prompt('Username:');
+                const password = prompt('Password:');
+                if (username === 'Zentrale1' && password === '9988') {
+                    localStorage.setItem('checkInData', JSON.stringify([]));
+                    loadCheckInData();
+                } else {
+                    alert('Invalid login credentials');
+                }
+            }
+        }
+
+        function saveToPDF() {
+            const checkInData = JSON.parse(localStorage.getItem('checkInData')) || [];
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            doc.text('Check-In List', 20, 10);
+            let row = 20;
+            checkInData.forEach(data => {
+                doc.text(`Vorname: ${data.vorname}`, 20, row);
+                doc.text(`Nachname: ${data.nachname}`, 20, row + 10);
+                doc.text(`Email: ${data.email}`, 20, row + 20);
+                doc.text(`Kontakt: ${data.kontakt}`, 20, row + 30);
+                doc.text(`Check-In Time: ${data.checkInTime}`, 20, row + 40);
+                doc.text(`Check-Out Time: ${data.checkOutTime || ''}`, 20, row + 50);
+                row += 60;
+            });
+            doc.save('check_in_list.pdf');
+        }
+
+        window.onload = function() {
+            const username = prompt('Username:');
+            const password = prompt('Password:');
+            if (username === 'Zentrale1' && password === '9988') {
+                loadCheckInData();
+            } else {
+                alert('Invalid login credentials');
+                window.location.href = 'index.html';
+            }
+        };
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.3.1/jspdf.umd.min.js"></script>
+</body>
+</html>

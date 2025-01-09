@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Besucherausweis Anmeldung</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            color: #4D4D4D;
+            background: url('office.jpg') no-repeat center center fixed;
+            background-size: cover;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input, select, button {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .logo {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        .centered-input {
+            width: calc(100% - 20px);
+            margin: 0 auto;
+        }
+        .check-in-list-button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin: 20px auto;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #f0f0f0;
+            text-align: center;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <img src="Bluebar.jpg" alt="Logo" class="logo">
+        <h1>Willkommen bei Brother! </h1>
+        <h2>Besucherausweis Anmeldung</h2>
+        <div class="form-group">
+            <label for="vorname">Vorname</label>
+            <input type="text" id="vorname" required>
+        </div>
+        <div class="form-group">
+            <label for="nachname">Nachname</label>
+            <input type="text" id="nachname" required>
+        </div>
+        <div class="form-group">
+            <label for="email">Email Adresse</label>
+            <input type="email" id="email" required>
+        </div>
+        <div class="form-group centered-input">
+            <label for="kontakt">Brother Kontakt</label>
+            <select id="kontakt" required>
+                <option value="Jovana Abutovic">Jovana Abutovic</option>
+                <option value="Roman Köbel">Roman Köbel</option>
+                <option value="Ondrej Hartmann">Ondrej Hartmann</option>
+            </select>
+        </div>
+        <div class="form-group centered-input">
+            <label for="firma">Firma</label>
+            <input type="text" id="firma" required>
+        </div>
+        <button onclick="checkIn()">Anmeldung drucken</button>
+    </div>
+    <button class="check-in-list-button" onclick="viewCheckInList()">Check-In Liste</button>
+
+    <script>
+        const contacts = {
+            "Jovana Abutovic": "big.presles.j@gmail.com",
+            "Roman Köbel": "big.presles.r@gmail.com",
+            "Ondrej Hartmann": "big.presles.h@gmail.com"
+        };
+
+        function checkIn() {
+            const vorname = document.getElementById('vorname').value;
+            const nachname = document.getElementById('nachname').value;
+            const email = document.getElementById('email').value;
+            const kontakt = document.getElementById('kontakt').value;
+            const firma = document.getElementById('firma').value;
+            const kontaktEmail = contacts[kontakt];
+            const checkInTime = new Date().toLocaleString();
+
+            // Generate URL
+            const url = `brotherwebprint://print?filename=visitor.lbx&rd58mm.bin&text1=${vorname}&text2=${nachname}&text3=${email}&text4=${kontakt}&text5=${kontaktEmail}&text6=${firma}`;
+            window.open(url, '_blank');
+
+            // Send email notification
+            fetch('/send-email', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    email: kontaktEmail,
+                    subject: 'New Visitor Check-In',
+                    text: `A new visitor has checked in:\n\nVorname: ${vorname}\nNachname: ${nachname}\nEmail: ${email}\nKontakt: ${kontakt}\nFirma: ${firma}\nCheck-In Time: ${checkInTime}`
+                })
+            })
+            .then(response => response.text())
+            .then(data => alert(data))
+            .catch(error => console.error('Error:', error));
+
+            // Save check-in data to localStorage
+            const checkInData = JSON.parse(localStorage.getItem('checkInData')) || [];
+            checkInData.push({ vorname, nachname, email, kontakt, firma, checkInTime, checkedOut: false });
+            localStorage.setItem('checkInData', JSON.stringify(checkInData));
+        }
+
+        function viewCheckInList() {
+            // Update this URL to the new location of your check-in list
+            window.location.href = 'http://new-location.com/checkinlist.html';
+        }
+    </script>
+</body>
+</html>
