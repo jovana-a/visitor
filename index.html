@@ -124,6 +124,9 @@
             .then(data => alert(data))
             .catch(error => console.error('Error:', error));
 
+            // Show pop-up message
+            alert('Danke für Ihre Anmeldung! Brother Mitarbeiter wurde informiert.');
+
             // Save check-in data to localStorage
             const checkInData = JSON.parse(localStorage.getItem('checkInData')) || [];
             checkInData.push({ vorname, nachname, email, kontakt, firma, checkInTime, checkedOut: false });
