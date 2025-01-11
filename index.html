@@ -120,7 +120,8 @@
                 email: email,
                 kontakt: kontakt,
                 firma: firma,
-                checkInTime: checkInTime
+                checkInTime: checkInTime,
+                to_email: kontaktEmail // Add this line to specify the recipient email
             })
             .then(response => {
                 console.log('SUCCESS!', response.status, response.text);
