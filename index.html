@@ -1,3 +1,6 @@
+emailjs
+
+
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -87,7 +90,12 @@
     </div>
     <button class="check-in-list-button" onclick="viewCheckInList()">Check-In Liste</button>
 
-    <script>
+    <script type="text/javascript" src="https://cdn.emailjs.com/dist/email.min.js"></script>
+    <script type="text/javascript">
+        (function(){
+            emailjs.init("YOUR_USER_ID");
+        })();
+
         const contacts = {
             "Jovana Abutovic": "big.presles.j@gmail.com",
             "Roman Köbel": "big.presles.r@gmail.com",
@@ -107,22 +115,22 @@
             const url = `brotherwebprint://print?filename=visitor.lbx&size=RollW54&text_text1=${vorname}&text_text2=${nachname}&text_text3=${email}&text_text4=${kontakt}&text_text5=${kontaktEmail}&text_text6=${firma}`;
             window.open(url, '_blank');
 
-            // Send email notification
-            fetch('https://your-vercel-app.vercel.app/api/send-email', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    from: 'bigpresales@gmail.com',
-                    to: kontaktEmail,
-                    subject: 'New Visitor Check-In',
-                    text: `Your visitor ${vorname} ${nachname} has just checked in the Build Part C.`
-                })
+            // Send email notification using EmailJS
+            emailjs.send("big_presales", "template_6zrwyuq", {
+                vorname: vorname,
+                nachname: nachname,
+                email: email,
+                kontakt: kontakt,
+                firma: firma,
+                checkInTime: checkInTime
             })
-            .then(response => response.text())
-            .then(data => alert(data))
-            .catch(error => console.error('Error:', error));
+            .then(response => {
+                console.log('SUCCESS!', response.status, response.text);
+                alert('Email sent successfully!');
+            }, error => {
+                console.error('FAILED...', error);
+                alert('Failed to send email.');
+            });
 
             // Show pop-up message
             alert('Danke für Ihre Anmeldung! Brother Mitarbeiter wurde informiert.');
