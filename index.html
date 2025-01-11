@@ -102,44 +102,44 @@ emailjs
             "Ondrej Hartmann": "big.presles.h@gmail.com"
         };
 
-        function checkIn() {
-            const vorname = document.getElementById('vorname').value;
-            const nachname = document.getElementById('nachname').value;
-            const email = document.getElementById('email').value;
-            const kontakt = document.getElementById('kontakt').value;
-            const firma = document.getElementById('firma').value;
-            const kontaktEmail = contacts[kontakt];
-            const checkInTime = new Date().toLocaleString();
+function checkIn() {
+    const vorname = document.getElementById('vorname').value;
+    const nachname = document.getElementById('nachname').value;
+    const email = document.getElementById('email').value;
+    const kontakt = document.getElementById('kontakt').value;
+    const firma = document.getElementById('firma').value;
+    const kontaktEmail = contacts[kontakt];
+    const checkInTime = new Date().toLocaleString();
 
-            // Generate URL
-            const url = `brotherwebprint://print?filename=visitor.lbx&size=RollW54&text_text1=${vorname}&text_text2=${nachname}&text_text3=${email}&text_text4=${kontakt}&text_text5=${kontaktEmail}&text_text6=${firma}`;
-            window.open(url, '_blank');
+    // Generate URL
+    const url = `brotherwebprint://print?filename=visitor.lbx&size=RollW54&text_text1=${vorname}&text_text2=${nachname}&text_text3=${email}&text_text4=${kontakt}&text_text5=${kontaktEmail}&text_text6=${firma}`;
+    window.open(url, '_blank');
 
-            // Send email notification using EmailJS
-            emailjs.send("big_presales", "template_6zrwyuq", {
-                vorname: vorname,
-                nachname: nachname,
-                email: email,
-                kontakt: kontakt,
-                firma: firma,
-                checkInTime: checkInTime
-            })
-            .then(response => {
-                console.log('SUCCESS!', response.status, response.text);
-                alert('Email sent successfully!');
-            }, error => {
-                console.error('FAILED...', error);
-                alert('Failed to send email.');
-            });
+    // Send email notification using EmailJS
+    emailjs.send("big_presales", "template_6zrwyuq", {
+        vorname: vorname,
+        nachname: nachname,
+        email: email,
+        kontakt: kontakt,
+        firma: firma,
+        checkInTime: checkInTime
+    })
+    .then(response => {
+        console.log('SUCCESS!', response.status, response.text);
+        alert('Email sent successfully!');
+    }, error => {
+        console.error('FAILED...', error);
+        alert('Failed to send email. Please check the console for more details.');
+    });
 
-            // Show pop-up message
-            alert('Danke für Ihre Anmeldung! Brother Mitarbeiter wurde informiert.');
+    // Show pop-up message
+    alert('Danke für Ihre Anmeldung! Brother Mitarbeiter wurde informiert.');
 
-            // Save check-in data to localStorage
-            const checkInData = JSON.parse(localStorage.getItem('checkInData')) || [];
-            checkInData.push({ vorname, nachname, email, kontakt, firma, checkInTime, checkedOut: false });
-            localStorage.setItem('checkInData', JSON.stringify(checkInData));
-        }
+    // Save check-in data to localStorage
+    const checkInData = JSON.parse(localStorage.getItem('checkInData')) || [];
+    checkInData.push({ vorname, nachname, email, kontakt, firma, checkInTime, checkedOut: false });
+    localStorage.setItem('checkInData', JSON.stringify(checkInData));
+}
 
         function viewCheckInList() {
             // Update this URL to the new location of your check-in list
