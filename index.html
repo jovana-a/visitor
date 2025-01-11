@@ -108,7 +108,7 @@
             window.open(url, '_blank');
 
             // Send email notification
-            fetch('/send-email', {
+            fetch('https://your-vercel-app.vercel.app/api/send-email', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
