@@ -114,9 +114,10 @@
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    email: kontaktEmail,
+                    from: 'bigpresales@gmail.com',
+                    to: kontaktEmail,
                     subject: 'New Visitor Check-In',
-                    text: `A new visitor has checked in:\n\nVorname: ${vorname}\nNachname: ${nachname}\nEmail: ${email}\nKontakt: ${kontakt}\nFirma: ${firma}\nCheck-In Time: ${checkInTime}`
+                    text: `Your visitor ${vorname} ${nachname} has just checked in the Build Part C.`
                 })
             })
             .then(response => response.text())
