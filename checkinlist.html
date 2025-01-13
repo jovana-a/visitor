@@ -65,6 +65,30 @@
     </div>
 
     <script>
+        function loadCheckInDataFromGitHub() {
+            const token = 'YOUR_GITHUB_PERSONAL_ACCESS_TOKEN';
+            const repo = 'YOUR_GITHUB_USERNAME/YOUR_REPOSITORY_NAME';
+            const path = 'checkin_data.json';
+
+            fetch(`https://api.github.com/repos/${repo}/contents/${path}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `token ${token}`,
+                    'Accept': 'application/vnd.github.v3+json'
+                }
+            })
+            .then(response => response.json())
+            .then(fileData => {
+                const content = atob(fileData.content);
+                const checkInData = JSON.parse(content);
+                localStorage.setItem('checkInData', JSON.stringify(checkInData));
+                loadCheckInData();
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+        }
+
         function loadCheckInData() {
             const checkInData = JSON.parse(localStorage.getItem('checkInData')) || [];
             const table = document.getElementById('checkInList').getElementsByTagName('tbody')[0];
@@ -90,11 +114,56 @@
                             data.checkedOut = true;
                             data.checkOutTime = new Date().toLocaleString();
                             localStorage.setItem('checkInData', JSON.stringify(checkInData));
+                            saveCheckInDataToGitHub(checkInData);
                             loadCheckInData();
                         }
                     };
                     checkOutCell.appendChild(checkOutButton);
                 }
+            });
+        }
+
+        function saveCheckInDataToGitHub(data) {
+            const token = 'YOUR_GITHUB_PERSONAL_ACCESS_TOKEN';
+            const repo = 'YOUR_GITHUB_USERNAME/YOUR_REPOSITORY_NAME';
+            const path = 'checkin_data.json';
+
+            fetch(`https://api.github.com/repos/${repo}/contents/${path}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `token ${token}`,
+                    'Accept': 'application/vnd.github.v3+json'
+                }
+            })
+            .then(response => response.json())
+            .then(fileData => {
+                const content = atob(fileData.content);
+                const checkInData = JSON.parse(content);
+
+                const updatedContent = btoa(JSON.stringify(checkInData));
+
+                fetch(`https://api.github.com/repos/${repo}/contents/${path}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    },
+                    body: JSON.stringify({
+                        message: 'Update check-in data',
+                        content: updatedContent,
+                        sha: fileData.sha
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Success:', data);
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                });
+            })
+            .catch((error) => {
+                console.error('Error:', error);
             });
         }
 
@@ -104,6 +173,7 @@
                 const password = prompt('Password:');
                 if (username === 'Zentrale1' && password === '9988') {
                     localStorage.setItem('checkInData', JSON.stringify([]));
+                    saveCheckInDataToGitHub([]);
                     loadCheckInData();
                 } else {
                     alert('Invalid login credentials');
@@ -133,7 +203,7 @@
             const username = prompt('Username:');
             const password = prompt('Password:');
             if (username === 'Zentrale1' && password === '9988') {
-                loadCheckInData();
+                loadCheckInDataFromGitHub();
             } else {
                 alert('Invalid login credentials');
                 window.location.href = 'index.html';
