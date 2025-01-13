@@ -138,12 +138,47 @@
             const checkInData = JSON.parse(localStorage.getItem('checkInData')) || [];
             checkInData.push({ vorname, nachname, email, kontakt, firma, checkInTime, checkedOut: false });
             localStorage.setItem('checkInData', JSON.stringify(checkInData));
+
+            // Save check-in data to server
+            saveCheckInDataToServer({ vorname, nachname, email, kontakt, firma, checkInTime, checkedOut: false });
+        }
+
+        function saveCheckInDataToServer(data) {
+            fetch('http://localhost:3000/api/save_check_in_data', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Success:', data);
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
         }
 
         function viewCheckInList() {
-            // Update this URL to the new location of your check-in list
             window.location.href = 'http://jovana-a.github.io/visitor/checkinlist.html';
         }
+
+        function loadCheckInDataFromServer() {
+            fetch('http://localhost:3000/api/load_check_in_data')
+            .then(response => response.json())
+            .then(data => {
+                localStorage.setItem('checkInData', JSON.stringify(data));
+                loadCheckInData();
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+        }
+
+        window.onload = function() {
+            loadCheckInDataFromServer();
+        };
     </script>
 </body>
 </html>
