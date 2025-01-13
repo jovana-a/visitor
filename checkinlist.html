@@ -66,8 +66,8 @@
 
     <script>
         function loadCheckInDataFromGitHub() {
-            const token = 'YOUR_GITHUB_PERSONAL_ACCESS_TOKEN';
-            const repo = 'YOUR_GITHUB_USERNAME/YOUR_REPOSITORY_NAME';
+            const token = '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';
+            const repo = 'jovana-a/visitor';
             const path = 'checkin_data.json';
 
             fetch(`https://api.github.com/repos/${repo}/contents/${path}`, {
@@ -124,8 +124,8 @@
         }
 
         function saveCheckInDataToGitHub(data) {
-            const token = 'YOUR_GITHUB_PERSONAL_ACCESS_TOKEN';
-            const repo = 'YOUR_GITHUB_USERNAME/YOUR_REPOSITORY_NAME';
+            const token = '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';
+            const repo = 'jovana-a/visitor';
             const path = 'checkin_data.json';
 
             fetch(`https://api.github.com/repos/${repo}/contents/${path}`, {
