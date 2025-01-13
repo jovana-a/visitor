@@ -134,15 +134,85 @@
             // Show pop-up message
             alert('Danke für Ihre Anmeldung! Brother Mitarbeiter wurde informiert.');
 
-            // Save check-in data to localStorage
-            const checkInData = JSON.parse(localStorage.getItem('checkInData')) || [];
-            checkInData.push({ vorname, nachname, email, kontakt, firma, checkInTime, checkedOut: false });
-            localStorage.setItem('checkInData', JSON.stringify(checkInData));
+            // Save check-in data to GitHub
+            saveCheckInDataToGitHub({ vorname, nachname, email, kontakt, firma, checkInTime, checkedOut: false });
+        }
+
+        function saveCheckInDataToGitHub(data) {
+            const token = 'YOUR_GITHUB_PERSONAL_ACCESS_TOKEN';
+            const repo = 'YOUR_GITHUB_USERNAME/YOUR_REPOSITORY_NAME';
+            const path = 'checkin_data.json';
+
+            fetch(`https://api.github.com/repos/${repo}/contents/${path}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `token ${token}`,
+                    'Accept': 'application/vnd.github.v3+json'
+                }
+            })
+            .then(response => response.json())
+            .then(fileData => {
+                const content = atob(fileData.content);
+                const checkInData = JSON.parse(content);
+                checkInData.push(data);
+
+                const updatedContent = btoa(JSON.stringify(checkInData));
+
+                fetch(`https://api.github.com/repos/${repo}/contents/${path}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    },
+                    body: JSON.stringify({
+                        message: 'Update check-in data',
+                        content: updatedContent,
+                        sha: fileData.sha
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Success:', data);
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                });
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
         }
 
         function viewCheckInList() {
-            window.location.href = 'http://jovana-a.github.io/visitor/checkinlist.html';
+            window.location.href = 'http://YOUR_GITHUB_USERNAME.github.io/YOUR_REPOSITORY_NAME/checkinlist.html';
         }
+
+        function loadCheckInDataFromGitHub() {
+            const token = 'YOUR_GITHUB_PERSONAL_ACCESS_TOKEN';
+            const repo = 'YOUR_GITHUB_USERNAME/YOUR_REPOSITORY_NAME';
+            const path = 'checkin_data.json';
+
+            fetch(`https://api.github.com/repos/${repo}/contents/${path}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `token ${token}`,
+                    'Accept': 'application/vnd.github.v3+json'
+                }
+            })
+            .then(response => response.json())
+            .then(fileData => {
+                const content = atob(fileData.content);
+                const checkInData = JSON.parse(content);
+                localStorage.setItem('checkInData', JSON.stringify(checkInData));
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+        }
+
+        window.onload = function() {
+            loadCheckInDataFromGitHub();
+        };
     </script>
 </body>
 </html>
