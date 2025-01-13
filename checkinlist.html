@@ -65,6 +65,18 @@
     </div>
 
     <script>
+        function loadCheckInDataFromServer() {
+            fetch('http://localhost:3000/api/load_check_in_data')
+            .then(response => response.json())
+            .then(data => {
+                localStorage.setItem('checkInData', JSON.stringify(data));
+                loadCheckInData();
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+        }
+
         function loadCheckInData() {
             const checkInData = JSON.parse(localStorage.getItem('checkInData')) || [];
             const table = document.getElementById('checkInList').getElementsByTagName('tbody')[0];
@@ -90,11 +102,29 @@
                             data.checkedOut = true;
                             data.checkOutTime = new Date().toLocaleString();
                             localStorage.setItem('checkInData', JSON.stringify(checkInData));
+                            saveCheckInDataToServer(checkInData);
                             loadCheckInData();
                         }
                     };
                     checkOutCell.appendChild(checkOutButton);
                 }
+            });
+        }
+
+        function saveCheckInDataToServer(data) {
+            fetch('http://localhost:3000/api/save_check_in_data', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Success:', data);
+            })
+            .catch((error) => {
+                console.error('Error:', error);
             });
         }
 
@@ -104,6 +134,7 @@
                 const password = prompt('Password:');
                 if (username === 'Zentrale1' && password === '9988') {
                     localStorage.setItem('checkInData', JSON.stringify([]));
+                    saveCheckInDataToServer([]);
                     loadCheckInData();
                 } else {
                     alert('Invalid login credentials');
@@ -133,7 +164,7 @@
             const username = prompt('Username:');
             const password = prompt('Password:');
             if (username === 'Zentrale1' && password === '9988') {
-                loadCheckInData();
+                loadCheckInDataFromServer();
             } else {
                 alert('Invalid login credentials');
                 window.location.href = 'index.html';
