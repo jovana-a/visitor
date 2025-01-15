@@ -87,10 +87,16 @@
     </div>
     <button class="check-in-list-button" onclick="viewCheckInList()">Check-In Liste</button>
 
-    <script>
+    <!-- Add the latest EmailJS SDK script -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script type="text/javascript">
+        (function(){
+            emailjs.init("ouXCgdoW_EFROw8Lx");
+        })();
+
         const contacts = {
             "Jovana Abutovic": "big.presles.j@gmail.com",
-            "Roman Köbel": "big.presles.r@gmail.com",
+            "Roman Köbel": "jovanaabutovic@gmail.com",
             "Ondrej Hartmann": "big.presles.h@gmail.com"
         };
 
@@ -107,32 +113,106 @@
             const url = `brotherwebprint://print?filename=visitor.lbx&size=RollW54&text_text1=${vorname}&text_text2=${nachname}&text_text3=${email}&text_text4=${kontakt}&text_text5=${kontaktEmail}&text_text6=${firma}`;
             window.open(url, '_blank');
 
-            // Send email notification
-            fetch('/send-email', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    email: kontaktEmail,
-                    subject: 'New Visitor Check-In',
-                    text: `A new visitor has checked in:\n\nVorname: ${vorname}\nNachname: ${nachname}\nEmail: ${email}\nKontakt: ${kontakt}\nFirma: ${firma}\nCheck-In Time: ${checkInTime}`
-                })
+            // Send email notification using EmailJS
+            emailjs.send("big_presales", "template_visitor", {
+                vorname: vorname,
+                nachname: nachname,
+                email: email,
+                kontakt: kontakt,
+                firma: firma,
+                checkInTime: checkInTime,
+                to_email: kontaktEmail // Add this line to specify the recipient email
             })
-            .then(response => response.text())
-            .then(data => alert(data))
-            .catch(error => console.error('Error:', error));
+            .then(response => {
+                console.log('SUCCESS!', response.status, response.text);
+                alert('Email sent successfully!');
+            }, error => {
+                console.error('FAILED...', error);
+                alert('Failed to send email. Please check the console for more details.');
+            });
 
-            // Save check-in data to localStorage
-            const checkInData = JSON.parse(localStorage.getItem('checkInData')) || [];
-            checkInData.push({ vorname, nachname, email, kontakt, firma, checkInTime, checkedOut: false });
-            localStorage.setItem('checkInData', JSON.stringify(checkInData));
+            // Show pop-up message
+            alert('Danke für Ihre Anmeldung! Brother Mitarbeiter wurde informiert.');
+
+            // Save check-in data to GitHub
+            saveCheckInDataToGitHub({ vorname, nachname, email, kontakt, firma, checkInTime, checkedOut: false });
+        }
+
+        function saveCheckInDataToGitHub(data) {
+            const token = 'YOUR_GITHUB_PERSONAL_ACCESS_TOKEN';
+            const repo = 'YOUR_GITHUB_USERNAME/YOUR_REPOSITORY_NAME';
+            const path = 'checkin_data.json';
+
+            fetch(`https://api.github.com/repos/${repo}/contents/${path}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `token ${token}`,
+                    'Accept': 'application/vnd.github.v3+json'
+                }
+            })
+            .then(response => response.json())
+            .then(fileData => {
+                const content = atob(fileData.content);
+                const checkInData = JSON.parse(content);
+                checkInData.push(data);
+
+                const updatedContent = btoa(JSON.stringify(checkInData));
+
+                fetch(`https://api.github.com/repos/${repo}/contents/${path}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    },
+                    body: JSON.stringify({
+                        message: 'Update check-in data',
+                        content: updatedContent,
+                        sha: fileData.sha
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Success:', data);
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                });
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
         }
 
         function viewCheckInList() {
-            // Update this URL to the new location of your check-in list
-            window.location.href = 'http://jovana-a.github.io/visitor/checkinlist.html';
+            window.location.href = 'http://YOUR_GITHUB_USERNAME.github.io/YOUR_REPOSITORY_NAME/checkinlist.html';
         }
+
+        function loadCheckInDataFromGitHub() {
+            const token = 'YOUR_GITHUB_PERSONAL_ACCESS_TOKEN';
+            const repo = 'YOUR_GITHUB_USERNAME/YOUR_REPOSITORY_NAME';
+            const path = 'checkin_data.json';
+
+            fetch(`https://api.github.com/repos/${repo}/contents/${path}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `token ${token}`,
+                    'Accept': 'application/vnd.github.v3+json'
+                }
+            })
+            .then(response => response.json())
+            .then(fileData => {
+                const content = atob(fileData.content);
+                const checkInData = JSON.parse(content);
+                localStorage.setItem('checkInData', JSON.stringify(checkInData));
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+        }
+
+        window.onload = function() {
+            loadCheckInDataFromGitHub();
+        };
     </script>
 </body>
 </html>
