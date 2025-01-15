@@ -108,24 +108,20 @@
             window.open(url, '_blank');
 
             // Send email notification
-            fetch('https://your-vercel-app.vercel.app/api/send-email', {
+            fetch('/send-email', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    from: 'bigpresales@gmail.com',
-                    to: kontaktEmail,
+                    email: kontaktEmail,
                     subject: 'New Visitor Check-In',
-                    text: `Your visitor ${vorname} ${nachname} has just checked in the Build Part C.`
+                    text: `A new visitor has checked in:\n\nVorname: ${vorname}\nNachname: ${nachname}\nEmail: ${email}\nKontakt: ${kontakt}\nFirma: ${firma}\nCheck-In Time: ${checkInTime}`
                 })
             })
             .then(response => response.text())
             .then(data => alert(data))
             .catch(error => console.error('Error:', error));
-
-            // Show pop-up message
-            alert('Danke für Ihre Anmeldung! Brother Mitarbeiter wurde informiert.');
 
             // Save check-in data to localStorage
             const checkInData = JSON.parse(localStorage.getItem('checkInData')) || [];
